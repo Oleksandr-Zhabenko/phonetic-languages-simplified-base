@@ -73,7 +73,7 @@ innerPartitioning
 innerPartitioning !frep2 data0 =
   let !l = F.maximum . mapG (toTransPropertiesF' frep2) $ data0 in partitionG ((== l) . getAC frep2) data0
 {-# INLINE innerPartitioning #-}
-{-# SPECIALIZE innerPartitioning :: (Ord c) => FuncRep2 [a] Double c -> [[a]] -> ([[a]], [[a]]) #-}
+{-# SPECIALIZE innerPartitioning :: (Eq a, Ord c) => FuncRep2 [a] Double c -> [[a]] -> ([[a]], [[a]]) #-}
 
 -- | The first argument must be not empty for the function to work correctly.
 innerPartitioningR
@@ -82,7 +82,7 @@ innerPartitioningR
 innerPartitioningR dataR =
   let !l = F.maximum . mapG transPropertiesF $ dataR in partitionG ((== l) . transPropertiesF) dataR
 {-# INLINE innerPartitioningR #-}
-{-# SPECIALIZE innerPartitioningR :: (Ord c) => [Result [] a Double c] -> ([Result [] a Double c], [Result [] a Double c]) #-}
+{-# SPECIALIZE innerPartitioningR :: (Eq a, Ord c) => [Result [] a Double c] -> ([Result [] a Double c], [Result [] a Double c]) #-}
 
 maximumGroupsClassification
   :: (InsertLeft t2 (t a), Monoid (t2 (t a)), Ord c, InsertLeft t2 c, Monoid (t2 c), Integral d) => d
@@ -95,7 +95,6 @@ maximumGroupsClassification !nGroups !frep2 (dataT,dataF)
  | otherwise = maximumGroupsClassification (nGroups - 1) frep2 (dataT `mappend` partT,partF)
      where (!partT,!partF) = innerPartitioning frep2 dataF
 {-# NOINLINE maximumGroupsClassification #-}
-{-# SPECIALIZE maximumGroupsClassification :: (Ord c, Integral d) => d -> FuncRep2 [a] Double c -> ([[a]], [[a]]) -> ([[a]], [[a]]) #-}
 
 maximumGroupsClassification1
   :: (InsertLeft t2 (t a), Monoid (t2 (t a)), Ord c, InsertLeft t2 c, Monoid (t2 c), Integral d) => d
@@ -107,7 +106,6 @@ maximumGroupsClassification1 !nGroups !frep2 data0
  | nGroups <= 0 = innerPartitioning frep2 data0
  | otherwise = maximumGroupsClassification (nGroups - 1) frep2 . innerPartitioning frep2 $ data0
 {-# NOINLINE maximumGroupsClassification1 #-}
-{-# SPECIALIZE maximumGroupsClassification1 :: (Ord c, Integral d) => d -> FuncRep2 [a] Double c -> [[a]] -> ([[a]], [[a]]) #-}
 
 maximumGroupsClassificationR2
   :: (Eq a, Eq b, Eq (t a), InsertLeft t2 (Result t a b c), Monoid (t2 (Result t a b c)), Ord c, InsertLeft t2 c, Monoid (t2 c), Integral d) => d
@@ -119,7 +117,6 @@ maximumGroupsClassificationR2 !nGroups (dataT,dataF)
  | otherwise = maximumGroupsClassificationR2 (nGroups - 1) (dataT `mappend` partT,partF)
      where (!partT,!partF) = innerPartitioningR dataF
 {-# NOINLINE maximumGroupsClassificationR2 #-}
-{-# SPECIALIZE maximumGroupsClassificationR2 :: (Eq a, Ord c, Integral d) => d -> ([Result [] a Double c], [Result [] a Double c]) -> ([Result [] a Double c], [Result [] a Double c])  #-}
 
 maximumGroupsClassificationR
   :: (Eq a, Eq b, Eq (t a), InsertLeft t2 (Result t a b c), Monoid (t2 (Result t a b c)), InsertLeft t2 c, Monoid (t2 c), Ord c, Integral d) => d
@@ -130,7 +127,6 @@ maximumGroupsClassificationR !nGroups dataR
  | nGroups <= 0 = innerPartitioningR dataR
  | otherwise = maximumGroupsClassificationR2 (nGroups - 1) . innerPartitioningR $ dataR
 {-# NOINLINE maximumGroupsClassificationR #-}
-{-# SPECIALIZE maximumGroupsClassificationR :: (Eq a, Ord c, Integral d) => d -> [Result [] a Double c] -> ([Result [] a Double c], [Result [] a Double c]) #-}
 
 toResultR
   :: FuncRep2 (t a) b c
@@ -140,7 +136,6 @@ toResultR !frep2 !ys = R { line = ys, propertiesF = m, transPropertiesF = tm}
   where !m = getAB frep2 ys
         !tm = getBC frep2 m
 {-# INLINE toResultR #-}
-{-# SPECIALIZE toResultR :: FuncRep2 [a] Double c -> [a] -> Result [] a Double c #-}
 
 toPropertiesF'
   :: FuncRep2 (t a) b c
@@ -148,7 +143,6 @@ toPropertiesF'
   -> b
 toPropertiesF' !frep2 !ys = getAB frep2 ys
 {-# INLINE toPropertiesF' #-}
-{-# SPECIALIZE toPropertiesF' :: FuncRep2 [a] Double c -> [a] -> Double  #-}
 
 toTransPropertiesF'
   :: FuncRep2 (t a) b c
@@ -156,7 +150,6 @@ toTransPropertiesF'
   -> c
 toTransPropertiesF' !frep2 !ys = getAC frep2 ys
 {-# INLINE toTransPropertiesF' #-}
-{-# SPECIALIZE toTransPropertiesF' :: FuncRep2 [a] Double c -> [a] -> c #-}
 
 -- | The second argument must be not empty for the function to work correctly.
 partiR
@@ -165,7 +158,7 @@ partiR
   -> (t2 (Result t a b c), t2 (Result t a b c))
 partiR p dataR = partitionG (p . transPropertiesF) dataR
 {-# INLINE partiR #-}
-{-# SPECIALIZE partiR :: (c -> Bool) -> [Result [] a Double c] -> ([Result [] a Double c], [Result [] a Double c])  #-}
+{-# SPECIALIZE partiR :: (Eq a, Eq c) => (c -> Bool) -> [Result [] a Double c] -> ([Result [] a Double c], [Result [] a Double c])  #-}
 
 -----------------------------------------------------------
 
@@ -219,7 +212,7 @@ innerPartitioning2
 innerPartitioning2 !frep2 data0 =
   let !l = F.maximum . mapG (toTransPropertiesF'2 frep2) $ data0 in partitionG ((== l) . getAC frep2) data0
 {-# INLINE innerPartitioning2 #-}
-{-# SPECIALIZE innerPartitioning2 :: (Ord c) => FuncRep2 a Double c -> [a] -> ([a], [a])  #-}
+{-# SPECIALIZE innerPartitioning2 :: (Eq a, Ord c) => FuncRep2 a Double c -> [a] -> ([a], [a])  #-}
 
 -- | The first argument must be not empty for the function to work correctly.
 innerPartitioningR2
@@ -228,7 +221,7 @@ innerPartitioningR2
 innerPartitioningR2 dataR =
   let !l = F.maximum . mapG transPropertiesF2 $ dataR in partitionG ((== l) . transPropertiesF2) dataR
 {-# INLINE innerPartitioningR2 #-}
-{-# SPECIALIZE innerPartitioningR2 :: (Ord c) => [Result2 a Double c] -> ([Result2 a Double c], [Result2 a Double c]) #-}
+{-# SPECIALIZE innerPartitioningR2 :: (Eq a, Ord c) => [Result2 a Double c] -> ([Result2 a Double c], [Result2 a Double c]) #-}
 
 maximumGroupsClassification2
   :: (InsertLeft t2 a, Monoid (t2 a), Ord c, InsertLeft t2 c, Monoid (t2 c), Integral d) => d
@@ -241,7 +234,6 @@ maximumGroupsClassification2 !nGroups !frep2 (dataT,dataF)
  | otherwise = maximumGroupsClassification2 (nGroups - 1) frep2 (dataT `mappend` partT,partF)
      where (!partT,!partF) = innerPartitioning2 frep2 dataF
 {-# NOINLINE maximumGroupsClassification2 #-}
-{-# SPECIALIZE maximumGroupsClassification2 :: (Ord c, Integral d) => d -> FuncRep2 a Double c -> ([a], [a]) -> ([a], [a]) #-}
 
 maximumGroupsClassification12
   :: (InsertLeft t2 a, Monoid (t2 a), Ord c, InsertLeft t2 c, Monoid (t2 c), Integral d) => d
@@ -253,7 +245,6 @@ maximumGroupsClassification12 !nGroups !frep2 data0
  | nGroups <= 0 = innerPartitioning2 frep2 data0
  | otherwise = maximumGroupsClassification2 (nGroups - 1) frep2 . innerPartitioning2 frep2 $ data0
 {-# NOINLINE maximumGroupsClassification12 #-}
-{-# SPECIALIZE maximumGroupsClassification12 :: (Ord c, Integral d) => d -> FuncRep2 a Double c -> [a] -> ([a], [a]) #-}
 
 maximumGroupsClassificationR2_2
   :: (Eq a, Eq b, InsertLeft t2 (Result2 a b c), Monoid (t2 (Result2 a b c)), Ord c, InsertLeft t2 c, Monoid (t2 c), Integral d) => d
@@ -265,7 +256,6 @@ maximumGroupsClassificationR2_2 !nGroups (dataT,dataF)
  | otherwise = maximumGroupsClassificationR2_2 (nGroups - 1) (dataT `mappend` partT,partF)
      where (!partT,!partF) = innerPartitioningR2 dataF
 {-# NOINLINE maximumGroupsClassificationR2_2 #-}
-{-# SPECIALIZE maximumGroupsClassificationR2_2 :: (Eq a, Ord c, Integral d) => d -> ([Result2 a Double c], [Result2 a Double c]) -> ([Result2 a Double c], [Result2 a Double c]) #-}
 
 maximumGroupsClassificationR_2
   :: (Eq a, Eq b, InsertLeft t2 (Result2 a b c), Monoid (t2 (Result2 a b c)), InsertLeft t2 c, Monoid (t2 c), Ord c, Integral d) => d
@@ -276,7 +266,6 @@ maximumGroupsClassificationR_2 !nGroups dataR
  | nGroups <= 0 = innerPartitioningR2 dataR
  | otherwise = maximumGroupsClassificationR2_2 (nGroups - 1) . innerPartitioningR2 $ dataR
 {-# NOINLINE maximumGroupsClassificationR_2 #-}
-{-# SPECIALIZE maximumGroupsClassificationR_2 :: (Eq a, Ord c, Integral d) => d -> [Result2 a Double c] -> ([Result2 a Double c], [Result2 a Double c]) #-}
 
 toResultR2
   :: FuncRep2 a b c
@@ -286,7 +275,6 @@ toResultR2 !frep2 !y = R2 { line2 = y, propertiesF2 = m, transPropertiesF2 = tm}
   where !m = getAB frep2 y
         !tm = getBC frep2 m
 {-# INLINE toResultR2 #-}
-{-# SPECIALIZE toResultR2 :: FuncRep2 a Double c -> a -> Result2 a Double c #-}
 
 toPropertiesF'2
   :: FuncRep2 a b c
@@ -294,7 +282,6 @@ toPropertiesF'2
   -> b
 toPropertiesF'2 !frep2 !y = getAB frep2 y
 {-# INLINE toPropertiesF'2 #-}
-{-# SPECIALIZE toPropertiesF'2 :: FuncRep2 a Double c -> a -> Double #-}
 
 toTransPropertiesF'2
   :: FuncRep2 a b c
@@ -302,7 +289,6 @@ toTransPropertiesF'2
   -> c
 toTransPropertiesF'2 !frep2 !y = getAC frep2 y
 {-# INLINE toTransPropertiesF'2 #-}
-{-# SPECIALIZE toTransPropertiesF'2 :: FuncRep2 a Double c -> a -> c #-}
 
 -- | The second argument must be not empty for the function to work correctly.
 partiR2
@@ -311,5 +297,5 @@ partiR2
   -> (t2 (Result2 a b c), t2 (Result2 a b c))
 partiR2 p dataR = partitionG (p . transPropertiesF2) dataR
 {-# INLINE partiR2 #-}
-{-# SPECIALIZE partiR2 :: (c -> Bool) -> [Result2 a Double c] -> ([Result2 a Double c], [Result2 a Double c]) #-}
+{-# SPECIALIZE partiR2 :: (Eq a, Eq c) => (c -> Bool) -> [Result2 a Double c] -> ([Result2 a Double c], [Result2 a Double c]) #-}
 
