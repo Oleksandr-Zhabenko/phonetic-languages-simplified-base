@@ -71,4 +71,8 @@ Phonetic.Languages.Simplified.DataG.Partir. Changed the dependencies schemes to 
 ## 0.8.0.0 -- 2024-01-24
 
 * Eighth version. Added bug-tracker on Github. Generalized functions with specializing. Updated the dependencies, switched to minmax and monoid-insertleft instead of subG.
- 
+
+ ## 0.9.0.0 -- 2024-03-08
+
+* Ninth version. Added a new module Data.ChooseLine with common functionality for PhLADiPreLiO mostly taken and rewritten from previous implementations. 
+
